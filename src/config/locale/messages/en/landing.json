@@ -1,0 +1,206 @@
+{
+  "header": {
+    "id": "header",
+    "brand": {
+      "title": "Wan Ai",
+      "logo": {
+        "src": "/logo.png",
+        "alt": "Wan Ai",
+        "width": 100,
+        "height": 100
+      },
+      "url": "/"
+    },
+    "nav": {
+      "items": [
+        {
+          "title": "Features",
+          "url": "/#features",
+          "icon": "Sparkles"
+        },
+        {
+          "title": "Showcases",
+          "url": "/showcases",
+          "icon": "Box"
+        },
+        {
+          "title": "Pricing",
+          "url": "/pricing",
+          "icon": "DollarSign"
+        },
+        {
+          "title": "Create",
+          "icon": "RiRobot2Line",
+          "children": [
+            {
+              "title": "Text to Video",
+              "description": "Generate videos from text prompts",
+              "url": "/text-to-video",
+              "icon": "RiVideoLine"
+            },
+            {
+              "title": "Image to Video",
+              "description": "Generate videos from images",
+              "url": "/image-to-video",
+              "icon": "RiImage2Line"
+            }
+          ]
+        },
+        {
+          "title": "Content",
+          "icon": "FileText",
+          "children": [
+            {
+              "title": "Blog",
+              "description": "Read Blog Posts",
+              "url": "/blog",
+              "icon": "Newspaper"
+            },
+            {
+              "title": "Updates",
+              "description": "Read Update Logs",
+              "url": "/updates",
+              "icon": "Clock"
+            },
+            {
+              "title": "Docs",
+              "description": "Read Documentation",
+              "url": "/docs",
+              "target": "_blank",
+              "icon": "BookOpenText"
+            }
+          ]
+        }
+      ]
+    },
+    "buttons": [],
+    "user_nav": {
+      "show_name": true,
+      "show_credits": true,
+      "show_sign_out": true,
+      "items": [
+        {
+          "title": "Billing",
+          "url": "/settings/billing",
+          "icon": "CreditCard"
+        },
+        {
+          "title": "Activity",
+          "url": "/activity",
+          "icon": "Activity"
+        }
+      ]
+    },
+    "show_sign": true,
+    "show_theme": false,
+    "show_locale": false,
+    "topbanner": {
+      "text": "Experience the latest Wan 2.6 AI video generation technology. Create stunning videos from text or images at <a href='https://wan2-6.art' class='text-orange-300' target='_blank'>wan2-6.art</a>"
+    }
+  },
+  "footer": {
+    "id": "footer",
+    "brand": {
+      "title": "Wan Ai",
+      "description": "Wan Ai is a one-stop AI video generation platform featuring the latest Wan 2.6 AI video generation technology. Create stunning videos from text prompts or images.",
+      "logo": {
+        "src": "/logo.png",
+        "alt": "Wan Ai",
+        "width": 1024,
+        "height": 1024
+      },
+      "url": "/"
+    },
+    "nav": {
+      "items": [
+        {
+          "title": "About",
+          "children": [
+            {
+              "title": "Features",
+              "url": "/#features",
+              "target": "_self"
+            },
+            {
+              "title": "Showcases",
+              "url": "/showcases",
+              "target": "_self"
+            },
+            {
+              "title": "Pricing",
+              "url": "/pricing",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "Resources",
+          "children": [
+            {
+              "title": "Documents",
+              "url": "/docs",
+              "target": "_self"
+            },
+            {
+              "title": "Blog",
+              "url": "/blog",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "Links",
+          "children": [
+            {
+              "title": "Wan 2.6",
+              "url": "https://wan2-6.art",
+              "target": "_blank"
+            }
+          ]
+        }
+      ]
+    },
+    "social": {
+      "items": [
+        {
+          "title": "X",
+          "icon": "RiTwitterXFill",
+          "url": "https://x.com/wanai",
+          "target": "_blank"
+        },
+        {
+          "title": "Github",
+          "icon": "Github",
+          "url": "https://github.com/wanai",
+          "target": "_blank"
+        },
+        {
+          "title": "Discord",
+          "icon": "RiDiscordFill",
+          "url": "https://discord.gg/wanai",
+          "target": "_blank"
+        },
+        {
+          "title": "Email",
+          "icon": "Mail",
+          "url": "mailto:zyrliuwei@gmail.com",
+          "target": "_self"
+        }
+      ]
+    },
+    "agreement": {
+      "items": [
+        {
+          "title": "Privacy Policy",
+          "url": "/privacy-policy"
+        },
+        {
+          "title": "Terms of Service",
+          "url": "/terms-of-service"
+        }
+      ]
+    },
+    "show_theme": false,
+    "show_locale": false
+  }
+}

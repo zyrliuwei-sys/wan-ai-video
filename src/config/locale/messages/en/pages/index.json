@@ -1,0 +1,413 @@
+{
+  "page": {
+    "show_sections": [
+      "hero",
+      
+      "introduce",
+      "benefits",
+      "usage",
+      "features",
+      "stats",
+      "testimonials",
+      "faq",
+      "cta"
+    ],
+    "sections": {
+      "hero": {
+        "id": "hero",
+        "title": "Create Stunning Videos with AI",
+        "highlight_text": "Stunning Videos",
+        "description": "Wan Ai is a one-stop AI video generation platform powered by Wan 2.6.<br/>Transform your text or images into amazing videos in seconds.",
+       
+        "tip": "✨ Support text to video and image to video",
+        "buttons": [
+          {
+            "title": "Start Creating",
+            "icon": "Zap",
+            "url": "/text-to-video",
+            "target": "_self",
+            "variant": "default"
+          }
+        ],
+        "show_avatars": false,
+        "avatars_tip": "Thousands of creators are using Wan Ai",
+        "show_award": false,
+        "video": {
+          "src": "/videos/demo2.mp4",
+          "autoplay": true,
+          "loop": true,
+          "muted": true
+        },
+        "background_image": {
+          "src": "/imgs/bg/tree.jpg",
+          "alt": "hero"
+        },
+        "background_video": {
+          "src": "/videos/demo3.mp4",
+          "autoplay": true,
+          "loop": true,
+          "muted": true
+        }
+      },
+      "logos": {
+        "id": "logos",
+        "title": "Powered by the latest Wan 2.6 AI technology",
+        "items": [
+          {
+            "title": "Next.js",
+            "image": {
+              "src": "/imgs/logos/nextjs.svg",
+              "alt": "Next.js"
+            }
+          },
+          {
+            "title": "React",
+            "image": {
+              "src": "/imgs/logos/react.svg",
+              "alt": "React"
+            }
+          },
+          {
+            "title": "TailwindCSS",
+            "image": {
+              "src": "/imgs/logos/tailwindcss.svg",
+              "alt": "TailwindCSS"
+            }
+          },
+          {
+            "title": "Shadcn/UI",
+            "image": {
+              "src": "/imgs/logos/shadcn.svg",
+              "alt": "Shadcn/UI"
+            }
+          },
+          {
+            "title": "Vercel",
+            "image": {
+              "src": "/imgs/logos/vercel.svg",
+              "alt": "Vercel"
+            }
+          }
+        ]
+      },
+      "introduce": {
+        "block": "features-list",
+        "id": "introduce",
+        "title": "What is Wan Ai",
+        "label": "Introduce",
+        "description": "Wan Ai is a one-stop AI video generation platform featuring the latest Wan 2.6 technology. Create stunning videos from text or images effortlessly.",
+        "video": {
+          "src": "/videos/demo.mp4",
+          "autoplay": true,
+          "loop": true,
+          "muted": true
+        },
+        "items": [
+          {
+            "title": "Text to Video",
+            "description": "Transform your text prompts into stunning videos using the power of Wan 2.6 AI technology.",
+            "icon": "RiVideoLine",
+            "image": {
+              "src": "/imgs/features/1.png",
+              "alt": "introduce"
+            }
+          },
+          {
+            "title": "Image to Video",
+            "description": "Bring your images to life by converting them into dynamic, engaging video content.",
+            "icon": "RiImage2Line",
+            "image": {
+              "src": "/imgs/features/2.png",
+              "alt": "introduce"
+            }
+          },
+          {
+            "title": "Fast Generation",
+            "description": "Generate high-quality videos in seconds, not hours. Powered by state-of-the-art AI infrastructure.",
+            "icon": "RiSpeedFill",
+            "image": {
+              "src": "/imgs/features/3.png",
+              "alt": "introduce"
+            }
+          },
+          {
+            "title": "Wan 2.6 Technology",
+            "description": "Experience the latest breakthrough in AI video generation with our cutting-edge Wan 2.6 model.",
+            "icon": "RiRobot2Line",
+            "image": {
+              "src": "/imgs/features/4.png",
+              "alt": "introduce"
+            }
+          }
+        ],
+        "className": "bg-muted"
+      },
+      "benefits": {
+        "block": "features-accordion",
+        "id": "benefits",
+        "title": "Why Choose Wan Ai",
+        "label": "Benefits",
+        "description": "Experience the future of video creation with our cutting-edge AI technology.",
+        "video": {
+          "src": "/videos/demo1.mp4",
+          "autoplay": true,
+          "loop": true,
+          "muted": true
+        },
+        "items": [
+          {
+            "title": "Latest Wan 2.6 Technology",
+            "description": "Powered by the state-of-the-art Wan 2.6 AI model, delivering superior video quality and generation speed.",
+            "icon": "RiRobot2Line",
+            "image": {
+              "src": "/imgs/features/user-billing.png",
+              "alt": "benefits"
+            }
+          },
+          {
+            "title": "Multiple Generation Modes",
+            "description": "Support for both text-to-video and image-to-video generation, giving you creative flexibility.",
+            "icon": "RiClapperboardAiLine",
+            "image": {
+              "src": "/imgs/features/admin-settings.png",
+              "alt": "benefits"
+            }
+          },
+          {
+            "title": "Easy to Use",
+            "description": "Simple and intuitive interface designed for creators of all skill levels. No technical expertise required.",
+            "icon": "RiMagicFill",
+            "image": {
+              "src": "/imgs/features/landing-page.png",
+              "alt": "benefits"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "block": "features-step",
+        "id": "usage",
+        "title": "How to Create Videos with Wan Ai",
+        "description": "Generate stunning AI videos in three simple steps:",
+        "image": {
+          "src": "/imgs/features/1.png",
+          "alt": "usage"
+        },
+        "image_position": "left",
+        "text_align": "center",
+        "items": [
+          {
+            "title": "Choose Your Mode",
+            "description": "Select text-to-video to generate from prompts, or image-to-video to animate your images.",
+            "image": {
+              "src": "/imgs/features/5.png",
+              "alt": "usage"
+            }
+          },
+          {
+            "title": "Input Your Content",
+            "description": "Enter your text description or upload an image that you want to transform into video.",
+            "image": {
+              "src": "/imgs/features/6.png",
+              "alt": "usage"
+            }
+          },
+          {
+            "title": "Generate & Download",
+            "description": "Click generate and watch as Wan 2.6 creates your video. Download and share your creation.",
+            "image": {
+              "src": "/imgs/features/7.png",
+              "alt": "usage"
+            }
+          }
+        ],
+        "className": "bg-muted"
+      },
+      "features": {
+        "id": "features",
+        "title": "Key Features of Wan Ai",
+        "description": "Everything you need to create stunning AI-generated videos.",
+        "items": [
+          {
+            "title": "Text to Video",
+            "description": "Transform your text descriptions into beautiful, high-quality videos using AI.",
+            "icon": "RiVideoLine"
+          },
+          {
+            "title": "Image to Video",
+            "description": "Animate your images and bring them to life with our advanced AI technology.",
+            "icon": "RiImage2Line"
+          },
+          {
+            "title": "Wan 2.6 Powered",
+            "description": "Experience the latest in AI video generation with our cutting-edge Wan 2.6 model.",
+            "icon": "RiRobot2Line"
+          },
+          {
+            "title": "Fast Generation",
+            "description": "Generate videos in seconds, not minutes. Our optimized infrastructure ensures speed.",
+            "icon": "RiSpeedFill"
+          },
+          {
+            "title": "High Quality Output",
+            "description": "Produces high-resolution videos with smooth motion and stunning visual quality.",
+            "icon": "RiHdFill"
+          },
+          {
+            "title": "Easy to Use",
+            "description": "Simple and intuitive interface designed for creators of all skill levels.",
+            "icon": "RiUserHeartFill"
+          }
+        ]
+      },
+      "stats": {
+        "id": "stats",
+        "title": "People Love Wan Ai",
+        "description": "for its powerful AI video generation capabilities.",
+        "items": [
+          {
+            "title": "10K+",
+            "description": "Videos Created"
+          },
+          {
+            "title": "5K+",
+            "description": "Active Users"
+          },
+          {
+            "title": "99%",
+            "description": "Satisfaction"
+          }
+        ],
+        "className": "bg-muted"
+      },
+      "testimonials": {
+        "id": "testimonials",
+        "title": "What Users Say About Wan Ai",
+        "description": "Hear from creators who are using Wan Ai to bring their visions to life.",
+        "items": [
+          {
+            "name": "Alex Turner",
+            "role": "Content Creator",
+            "quote": "Wan Ai is incredible! I can now create professional videos for my social media in minutes. The text-to-video feature is a game-changer for my content workflow.",
+            "image": {
+              "src": "/imgs/avatars/1.png",
+              "alt": "alex"
+            }
+          },
+          {
+            "name": "Maria Rodriguez",
+            "role": "Marketing Director",
+            "quote": "The image-to-video feature helped us bring our product photos to life. Our engagement increased by 300% after using Wan Ai for our campaigns.",
+            "image": {
+              "src": "/imgs/avatars/2.png",
+              "alt": "maria"
+            }
+          },
+          {
+            "name": "James Liu",
+            "role": "YouTuber",
+            "quote": "As a content creator, time is everything. Wan Ai's fast generation means I can produce more videos in less time. The Wan 2.6 technology is amazing!",
+            "image": {
+              "src": "/imgs/avatars/3.png",
+              "alt": "james"
+            }
+          },
+          {
+            "name": "Sophie Chen",
+            "role": "Small Business Owner",
+            "quote": "I have no video editing experience, but Wan Ai made it so easy. Now I can create promotional videos for my business without hiring expensive professionals.",
+            "image": {
+              "src": "/imgs/avatars/4.png",
+              "alt": "sophie"
+            }
+          },
+          {
+            "name": "Michael Brown",
+            "role": "Digital Marketer",
+            "quote": "The video quality from Wan 2.6 is outstanding. Our clients are always amazed when we tell them these videos are AI-generated.",
+            "image": {
+              "src": "/imgs/avatars/5.png",
+              "alt": "michael"
+            }
+          },
+          {
+            "name": "Emma Zhang",
+            "role": "Freelance Designer",
+            "quote": "Wan Ai has become an essential tool in my design workflow. It helps me quickly visualize concepts and present video ideas to clients.",
+            "image": {
+              "src": "/imgs/avatars/6.png",
+              "alt": "emma"
+            }
+          }
+        ]
+      },
+      "faq": {
+        "id": "faq",
+        "title": "Frequently Asked Questions About Wan Ai",
+        "description": "Have another question? Contact us at zyrliuwei@gmail.com",
+        "items": [
+          {
+            "question": "What is Wan Ai and how does it work?",
+            "answer": "Wan Ai is a one-stop AI video generation platform powered by the latest Wan 2.6 technology. Simply input your text description or upload an image, and our AI will generate a stunning video for you in seconds."
+          },
+          {
+            "question": "What video generation modes are supported?",
+            "answer": "Wan Ai supports two main modes: Text to Video, where you describe the video you want in words, and Image to Video, where you upload an image and our AI brings it to life with motion and animation."
+          },
+          {
+            "question": "How long does it take to generate a video?",
+            "answer": "Video generation typically takes just a few seconds to a couple of minutes, depending on the length and complexity of your video. Our optimized Wan 2.6 model ensures fast processing without sacrificing quality."
+          },
+          {
+            "question": "What is Wan 2.6 technology?",
+            "answer": "Wan 2.6 is our state-of-the-art AI video generation model. It represents the latest breakthrough in AI video synthesis, delivering superior quality, realistic motion, and faster generation speeds."
+          },
+          {
+            "question": "Do I need video editing experience to use Wan Ai?",
+            "answer": "Not at all! Wan Ai is designed for everyone, regardless of technical skill level. Our intuitive interface makes it easy for anyone to create professional-quality videos with just a few clicks."
+          },
+          {
+            "question": "What can I use the generated videos for?",
+            "answer": "You can use your generated videos for social media content, marketing materials, product showcases, creative projects, educational content, and much more. The possibilities are endless!"
+          }
+        ]
+      },
+      "cta": {
+        "id": "cta",
+        "title": "Start Creating Amazing Videos Today",
+        "description": "Join thousands of creators using Wan Ai powered by Wan 2.6.",
+        "buttons": [
+          {
+            "title": "Start Creating",
+            "url": "/text-to-video",
+            "target": "_self",
+            "icon": "Zap"
+          },
+          {
+            "title": "Visit wan2-6.art",
+            "url": "https://wan2-6.art",
+            "target": "_blank",
+            "variant": "outline",
+            "icon": "RiExternalLinkLine"
+          }
+        ],
+        "className": "bg-muted"
+      },
+      "subscribe": {
+        "id": "subscribe",
+        "title": "Subscribe to our newsletter",
+        "description": "Get the latest news and updates about Wan Ai and Wan 2.6.",
+        "submit": {
+          "input": {
+            "placeholder": "Enter your email"
+          },
+          "button": {
+            "title": "Subscribe"
+          },
+          "action": "/api/subscribe"
+        },
+        "className": "bg-muted"
+      }
+    }
+  }
+}
