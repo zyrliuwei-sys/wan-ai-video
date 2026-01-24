@@ -34,28 +34,27 @@ export function FeaturesStep({
           </ScrollAnimation>
 
           <ScrollAnimation delay={0.2}>
-            <div className="mt-20 grid gap-12 @3xl:grid-cols-4">
+            <div className="mx-auto mt-20 grid max-w-5xl gap-8 md:grid-cols-3 @3xl:grid-cols-4">
               {section.items?.map((item, idx) => (
-                  <div className="space-y-6 text-center" key={idx}>
-                    <span className="mx-auto flex size-6 items-center justify-center rounded-full bg-zinc-500/15 text-sm font-medium">
+                  <div className="flex flex-col items-center space-y-4 text-center" key={idx}>
+                    <span className="mx-auto flex size-8 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
                       {idx + 1}
                     </span>
                     <div className="relative">
-                      <div className="mx-auto my-6 w-fit">
+                      <div className="flex size-16 items-center justify-center">
                         {item.icon && (
-                          <SmartIcon name={item.icon as string} size={24} />
+                          <SmartIcon name={item.icon as string} size={32} />
                         )}
                       </div>
-                      {idx < (section.items?.length ?? 0) - 1 && (
-                        <ArrowBigRight className="fill-muted stroke-primary absolute inset-y-0 right-0 my-auto mt-1 hidden translate-x-[150%] drop-shadow @3xl:block" />
-                      )}
                     </div>
-                    <h3 className="text-foreground mb-4 text-center text-lg font-semibold">
-                      {item.title}
-                    </h3>
-                    <p className="text-muted-foreground text-center text-balance">
-                      {item.description}
-                    </p>
+                    <div className="flex w-full flex-col items-center space-y-2 px-2">
+                      <h3 className="text-foreground text-center text-base font-semibold leading-tight">
+                        {item.title}
+                      </h3>
+                      <p className="text-muted-foreground text-center text-sm leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
                   </div>
               ))}
             </div>
