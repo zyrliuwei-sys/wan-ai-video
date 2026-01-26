@@ -419,6 +419,16 @@ export function Pricing({
                         ''
                       )}
                     </div>
+                    {item.annual_price && (
+                      <div className="text-muted-foreground text-sm">
+                        {item.annual_price}
+                      </div>
+                    )}
+                    {item.save_label && (
+                      <div className="text-emerald-500 text-sm">
+                        {item.save_label}
+                      </div>
+                    )}
 
                     {currencies.length > 1 && (
                       <Select
@@ -455,6 +465,17 @@ export function Pricing({
                     <span className="text-muted-foreground text-sm">
                       {item.tip}
                     </span>
+                  )}
+
+                  {item.highlights && item.highlights.length > 0 && (
+                    <ul className="mt-4 list-outside space-y-3 text-sm">
+                      {item.highlights.map((highlight, index) => (
+                        <li key={index} className="flex items-center gap-2">
+                          <Check className="size-3" />
+                          {highlight}
+                        </li>
+                      ))}
+                    </ul>
                   )}
 
                   {isCurrentPlan ? (

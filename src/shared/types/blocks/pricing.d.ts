@@ -29,6 +29,9 @@ export interface PricingItem {
   currencies?: PricingCurrency[]; // alternative currencies with different prices
 
   unit?: string;
+  annual_price?: string;
+  save_label?: string;
+  highlights?: string[];
   features_title?: string;
   features?: string[];
   button?: Button;
