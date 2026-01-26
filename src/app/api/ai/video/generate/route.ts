@@ -1,4 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { AIMediaType, AITaskStatus } from '@/extensions/ai';
+import { getUuid } from '@/shared/lib/hash';
+import { createAITask, NewAITask } from '@/shared/models/ai_task';
+import { getRemainingCredits } from '@/shared/models/credit';
+import { getUserInfo } from '@/shared/models/user';
+import { respData, respErr } from '@/shared/lib/resp';
 
 import { evolinkAPI } from '@/extensions/ai/evolink';
 import { replicateAPI } from '@/extensions/ai/replicate';
@@ -8,7 +13,18 @@ const buildErrorMessage = (error: unknown) => {
   return String(error);
 };
 
-export async function POST(request: NextRequest) {
+// Video generation cost credits based on type and duration
+const getVideoCostCredits = (
+  type: string,
+  duration: number = 5
+): number => {
+  const baseCredits = type === 'text-to-video' ? 6 : 8;
+  // Add extra cost for longer videos
+  const durationMultiplier = Math.ceil(duration / 5);
+  return baseCredits * durationMultiplier;
+};
+
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const {
@@ -25,32 +41,44 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!type) {
-      return NextResponse.json(
-        { success: false, error: 'Missing required field: type' },
-        { status: 400 }
-      );
+      return respErr('Missing required field: type');
     }
 
     if (type === 'text-to-video' && !prompt) {
-      return NextResponse.json(
-        { success: false, error: 'Missing required field: prompt for text-to-video' },
-        { status: 400 }
-      );
+      return respErr('Missing required field: prompt for text-to-video');
     }
 
     if (type === 'image-to-video' && !imageUrl) {
-      return NextResponse.json(
-        { success: false, error: 'Missing required field: imageUrl for image-to-video' },
-        { status: 400 }
-      );
+      return respErr('Missing required field: imageUrl for image-to-video');
     }
 
+    // ========== AUTH CHECK ==========
+    // Get current user
+    const user = await getUserInfo();
+    if (!user) {
+      return respErr('no auth, please sign in');
+    }
+
+    // ========== CREDITS CHECK ==========
+    // Calculate cost credits
+    const costCredits = getVideoCostCredits(type, duration);
+
+    // Check if user has enough credits
+    const remainingCredits = await getRemainingCredits(user.id);
+    if (remainingCredits < costCredits) {
+      return respErr(`insufficient credits, required: ${costCredits}, remaining: ${remainingCredits}`);
+    }
+
+    // ========== VIDEO GENERATION ==========
     const errors: string[] = [];
+    let result:
+      | { taskId: string; taskStatus: AITaskStatus; provider: string }
+      | undefined;
 
     // Try Replicate first
     if (process.env.REPLICATE_API_TOKEN) {
       try {
-        const result =
+        const apiResult =
           type === 'text-to-video'
             ? await replicateAPI.textToVideo({
                 prompt,
@@ -63,21 +91,20 @@ export async function POST(request: NextRequest) {
                 duration,
               });
 
-        return NextResponse.json({
-          success: true,
+        result = {
+          taskId: apiResult.taskId,
+          taskStatus: apiResult.taskStatus,
           provider: 'replicate',
-          taskId: result.taskId,
-          status: result.taskStatus,
-        });
+        };
       } catch (error) {
         errors.push(`replicate: ${buildErrorMessage(error)}`);
       }
     }
 
     // Fallback to Evolink
-    if (process.env.EVOLINK_API_KEY) {
+    if (!result && process.env.EVOLINK_API_KEY) {
       try {
-        const result =
+        const apiResult =
           type === 'text-to-video'
             ? await evolinkAPI.textToVideo({
                 prompt,
@@ -101,10 +128,13 @@ export async function POST(request: NextRequest) {
                 callbackUrl,
               });
 
-        if (result.status === 'failed' || result.status === 'cancelled') {
+        if (
+          apiResult.status === 'failed' ||
+          apiResult.status === 'cancelled'
+        ) {
           let failureDetail = '';
           try {
-            const statusResult = await evolinkAPI.getTaskStatus(result.id);
+            const statusResult = await evolinkAPI.getTaskStatus(apiResult.id);
             const errorMessage =
               statusResult.error?.message || statusResult.error?.code || '';
             if (errorMessage) failureDetail = `: ${errorMessage}`;
@@ -114,35 +144,62 @@ export async function POST(request: NextRequest) {
           throw new Error(`Evolink task failed on create${failureDetail}`);
         }
 
-        return NextResponse.json({
-          success: true,
+        result = {
+          taskId: apiResult.id,
+          taskStatus: apiResult.status as AITaskStatus,
           provider: 'evolink',
-          taskId: result.id,
-          status: result.status,
-          estimatedTime: result.task_info?.estimated_time,
-          creditsReserved: result.usage?.credits_reserved,
-        });
+        };
       } catch (error) {
         errors.push(`evolink: ${buildErrorMessage(error)}`);
       }
     }
 
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'No available provider could create the task',
-        details: errors.join(' | ') || 'Missing API keys for video providers',
-      },
-      { status: 500 }
-    );
+    // No provider succeeded
+    if (!result) {
+      return respErr(
+        `No available provider could create the task: ${errors.join(' | ') || 'Missing API keys for video providers'}`
+      );
+    }
+
+    // ========== CREATE AI TASK AND DEDUCT CREDITS ==========
+    const newAITask: NewAITask = {
+      id: getUuid(),
+      userId: user.id,
+      mediaType: AIMediaType.VIDEO,
+      provider: result.provider,
+      model: type === 'text-to-video' ? 'wan-2.5-t2v' : 'wan-2.5-i2v',
+      prompt: prompt || (imageUrl ? `Image to video: ${imageUrl}` : ''),
+      scene: type,
+      options: JSON.stringify({
+        aspectRatio,
+        quality,
+        duration,
+        promptExtend,
+        shotType,
+        audioUrl,
+        imageUrl,
+      }),
+      status: result.taskStatus,
+      costCredits,
+      taskId: result.taskId,
+      taskInfo: null,
+      taskResult: null,
+    };
+
+    await createAITask(newAITask);
+
+    return respData({
+      success: true,
+      provider: result.provider,
+      taskId: result.taskId,
+      status: result.taskStatus,
+      costCredits,
+      remainingCredits: remainingCredits - costCredits,
+    });
   } catch (error: any) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to create video generation task',
-        details: buildErrorMessage(error),
-      },
-      { status: 500 }
+    console.error('Video generation failed:', error);
+    return respErr(
+      `Failed to create video generation task: ${buildErrorMessage(error)}`
     );
   }
 }

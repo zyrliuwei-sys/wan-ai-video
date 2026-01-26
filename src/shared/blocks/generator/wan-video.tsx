@@ -1,8 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { Loader2, Sparkles, Download, AlertCircle, ArrowRight } from 'lucide-react';
+import { Loader2, Sparkles, Download, AlertCircle, LogIn, Wallet } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import {
   Dialog,
@@ -25,6 +24,8 @@ import { ImageUploader } from '@/shared/blocks/common/image-uploader';
 import { Meteors } from '@/shared/components/ui/meteors';
 import { Particles } from '@/shared/components/ui/particles';
 import { ShimmerButton } from '@/shared/components/ui/shimmer-button';
+import { useSession } from '@/core/auth/client';
+import { Link } from '@/core/i18n/navigation';
 import { cn } from '@/shared/lib/utils';
 
 interface VideoGeneratorProps {
@@ -215,6 +216,7 @@ function useWanVideoGenerator() {
     progress,
     videoUrl,
     error,
+    setError,
     isGenerating,
     handleGenerate,
     handleReset,
@@ -513,6 +515,10 @@ export function WanVideoGeneratorInline({
 }: {
   className?: string;
 }) {
+  // Get user session
+  const { data: session } = useSession();
+  const isAuthenticated = !!session?.user;
+
   const {
     type,
     setType,
@@ -525,16 +531,23 @@ export function WanVideoGeneratorInline({
     duration,
     setDuration,
     taskStatus,
+    setTaskStatus,
     taskId,
     provider,
     progress,
     videoUrl,
     error,
+    setError,
     isGenerating,
     handleGenerate,
     handleReset,
     downloadVideo,
   } = useWanVideoGenerator();
+
+  // Check if error is auth-related or credits-related
+  const isAuthError = error?.toLowerCase().includes('no auth') || error?.toLowerCase().includes('please sign in');
+  const isCreditsError = error?.toLowerCase().includes('insufficient credits');
+
   const proxiedVideoUrl = videoUrl
     ? `/api/proxy/file?url=${encodeURIComponent(videoUrl)}`
     : '';
@@ -705,7 +718,14 @@ export function WanVideoGeneratorInline({
 
             <div className="mt-6 space-y-3">
               <ShimmerButton
-                onClick={handleGenerate}
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    setError('Please sign in to generate videos');
+                    setTaskStatus('failed');
+                    return;
+                  }
+                  handleGenerate();
+                }}
                 disabled={isGenerating}
                 className="h-14 w-full rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white text-base font-semibold shadow-lg shadow-purple-500/25"
                 shimmerColor="#ffffff"
@@ -715,6 +735,11 @@ export function WanVideoGeneratorInline({
                   <>
                     <Loader2 className="mr-2 size-5 animate-spin" />
                     Creating...
+                  </>
+                ) : !isAuthenticated ? (
+                  <>
+                    <LogIn className="mr-2 size-5" />
+                    Sign In to Create
                   </>
                 ) : (
                   <>
@@ -727,9 +752,33 @@ export function WanVideoGeneratorInline({
               {taskStatus === 'failed' && (
                 <div className="flex items-start gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
                   <AlertCircle className="mt-0.5 size-4" />
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium">Generation failed</p>
-                    <p className="text-xs">{error}</p>
+                    <p className="text-xs mt-1">{error}</p>
+                    {isAuthError && (
+                      <Link href="/auth/signin">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="mt-2 h-8 border-red-400/30 text-red-200 hover:bg-red-500/20 hover:text-red-100"
+                        >
+                          <LogIn className="mr-1.5 size-3.5" />
+                          Sign In to Generate
+                        </Button>
+                      </Link>
+                    )}
+                    {isCreditsError && (
+                      <Link href="/pricing">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="mt-2 h-8 border-yellow-400/30 text-yellow-200 hover:bg-yellow-500/20 hover:text-yellow-100"
+                        >
+                          <Wallet className="mr-1.5 size-3.5" />
+                          Get More Credits
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 </div>
               )}
@@ -794,13 +843,7 @@ export function WanVideoGeneratorInline({
                 </div>
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Image
-                    src="/imgs/cases/3.png"
-                    alt="Preview"
-                    width={960}
-                    height={540}
-                    className="h-full w-full object-cover opacity-50"
-                  />
+                  <div className="h-full w-full bg-slate-400/30" />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
                       <Sparkles className="mx-auto mb-2 size-8 text-white/30" />
