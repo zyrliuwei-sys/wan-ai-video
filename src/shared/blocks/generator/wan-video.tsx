@@ -61,11 +61,15 @@ function useWanVideoGenerator() {
         const response = await fetch(
           `/api/ai/video/status?taskId=${taskId}&provider=${provider}`
         );
-        const data = await response.json();
+        const json = await response.json();
 
-        console.log('[Frontend] Status response:', data);
+        console.log('[Frontend] Status response:', json);
 
-        if (data.success) {
+        // Parse response based on format
+        const data = json.data || json;
+        const isSuccess = json.code === 0 || json.success || data.success;
+
+        if (isSuccess) {
           setProgress(data.progress || 0);
           const normalizedStatus = String(data.status || '').toLowerCase();
           const isCompleted = ['completed', 'succeeded', 'success'].includes(
@@ -96,7 +100,7 @@ function useWanVideoGenerator() {
             setTaskStatus('generating');
           }
         } else {
-          const message = data.details || data.error || 'Status check failed';
+          const message = json.message || data.details || data.error || 'Status check failed';
           console.error('[Frontend] Status check failed:', message);
           setTaskStatus('failed');
           setError(message);
@@ -151,13 +155,14 @@ function useWanVideoGenerator() {
 
       console.log('[Frontend] Generate API response status:', response.status);
 
-      const data = await response.json();
-      console.log('[Frontend] Generate API response:', data);
+      const json = await response.json();
+      console.log('[Frontend] Generate API response:', json);
 
-      if (!response.ok) {
-        throw new Error(data.details || data.error || 'Failed to start generation');
+      if (!response.ok || json.code !== 0) {
+        throw new Error(json.data?.details || json.data?.error || json.message || 'Failed to start generation');
       }
 
+      const data = json.data;
       if (data.success) {
         setTaskId(data.taskId);
         setProvider(data.provider || '');
