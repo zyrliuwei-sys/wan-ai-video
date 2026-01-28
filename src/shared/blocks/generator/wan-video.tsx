@@ -603,7 +603,7 @@ export function WanVideoGeneratorInline({
         </div>
 
         {/* Main Content */}
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="grid items-stretch gap-8 lg:grid-cols-2">
           <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-[0_20px_60px_rgba(7,10,24,0.35)] backdrop-blur-sm md:p-6">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div>
@@ -708,9 +708,11 @@ export function WanVideoGeneratorInline({
                         type="button"
                         variant="outline"
                         onClick={() => setAspectRatio(ratio)}
+                        disabled={isGenerating}
                         className={cn(
-                          'h-10 rounded-lg border-white/10 bg-black/30 text-white/80 hover:bg-white/10 transition-all',
-                          aspectRatio === ratio && 'border-white/40 bg-white/15 text-white'
+                          'h-10 rounded-lg border-white/10 bg-black/30 text-white/80 hover:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed',
+                          aspectRatio === ratio &&
+                            'border-purple-300/60 bg-gradient-to-r from-purple-500/35 to-pink-500/30 text-white shadow-[0_0_0_1px_rgba(192,132,252,0.5),0_8px_18px_rgba(147,51,234,0.25)]'
                         )}
                       >
                         {ratio}
@@ -732,7 +734,7 @@ export function WanVideoGeneratorInline({
                   handleGenerate();
                 }}
                 disabled={isGenerating}
-                className="h-14 w-full rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white text-base font-semibold shadow-lg shadow-purple-500/25"
+                className="h-14 w-full rounded-xl border border-white/10 bg-gradient-to-b from-fuchsia-500 via-purple-600 to-indigo-700 text-white text-base font-semibold shadow-[0_18px_30px_rgba(76,29,149,0.45),0_6px_12px_rgba(15,23,42,0.6),inset_0_1px_0_rgba(255,255,255,0.35)] transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0"
                 shimmerColor="#ffffff"
                 shimmerSize="0.1em"
               >
@@ -791,121 +793,144 @@ export function WanVideoGeneratorInline({
           </div>
 
           {/* Right Column - Video Preview */}
-          <div className="space-y-6">
-            <div className="rounded-2xl border border-white/10 bg-white/3 p-5 backdrop-blur-sm">
-            <div className="text-xs uppercase tracking-[0.2em] text-white/50">
-              Generated Video
+          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-[0_20px_60px_rgba(7,10,24,0.35)] backdrop-blur-sm md:p-6 flex h-full flex-col">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-white/40">
+                  Generated Video
+                </p>
+                <p className="mt-2 text-sm text-white/60">Preview & downloads</p>
+              </div>
+              <div
+                className={cn(
+                  'rounded-full border px-3 py-1 text-xs font-medium',
+                  isGenerating && 'border-purple-400/40 bg-purple-500/10 text-purple-200',
+                  !isGenerating &&
+                    taskStatus === 'completed' &&
+                    'border-emerald-400/40 bg-emerald-500/10 text-emerald-200',
+                  !isGenerating &&
+                    taskStatus !== 'completed' &&
+                    'border-white/15 bg-white/5 text-white/60'
+                )}
+              >
+                {isGenerating ? 'Rendering' : taskStatus === 'completed' ? 'Ready' : 'Waiting'}
+              </div>
             </div>
-            <div className="mt-4 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black/30 relative">
-              {taskStatus === 'completed' && videoUrl ? (
-                <>
-                  {process.env.NODE_ENV === 'development' && (
-                    <div className="absolute top-0 left-0 right-0 z-10 bg-black/80 text-xs text-white p-1 break-all">
-                      videoUrl exists: {videoUrl}
+
+            <div className="mt-5 flex flex-1 flex-col">
+              <div className="relative flex-1 overflow-hidden rounded-xl border border-white/10 bg-[radial-gradient(circle_at_top,#1b2138_0%,rgba(6,10,22,0.9)_55%,rgba(2,4,12,1)_100%)] p-3">
+                <div className="absolute inset-0 opacity-40 bg-[linear-gradient(120deg,rgba(255,255,255,0.04),transparent_40%),linear-gradient(0deg,rgba(255,255,255,0.03),transparent_35%)]" />
+                <div className="relative h-full w-full rounded-lg border border-white/10 bg-black/40 shadow-[inset_0_0_30px_rgba(0,0,0,0.55)]">
+                  {taskStatus === 'completed' && videoUrl ? (
+                    <>
+                      {process.env.NODE_ENV === 'development' && (
+                        <div className="absolute top-0 left-0 right-0 z-10 bg-black/80 text-xs text-white p-1 break-all">
+                          videoUrl exists: {videoUrl}
+                        </div>
+                      )}
+                      <video
+                        key={proxiedVideoUrl || videoUrl}
+                        src={proxiedVideoUrl || videoUrl}
+                        controls
+                        className="h-full w-full object-contain"
+                        autoPlay
+                        loop
+                        onError={(e) => {
+                          console.error('[Inline Video] ========== VIDEO ERROR ==========');
+                          console.error('[Inline Video] videoUrl:', videoUrl);
+                          console.error('[Inline Video] videoUrl type:', typeof videoUrl);
+                          console.error('[Inline Video] videoUrl length:', videoUrl?.length);
+                          console.error('[Inline Video] Error event:', e);
+                          console.error('[Inline Video] Native error:', (e.target as HTMLVideoElement).error);
+                          console.error('[Inline Video] Network state:', (e.target as HTMLVideoElement).networkState);
+                        }}
+                        onLoadStart={() => {
+                          console.log('[Inline Video] ========== VIDEO LOADING ==========');
+                          console.log('[Inline Video] videoUrl:', videoUrl);
+                        }}
+                        onLoadedData={(e) => {
+                          console.log('[Inline Video] ========== VIDEO LOADED ==========');
+                          console.log('[Inline Video] Duration:', (e.target as HTMLVideoElement).duration);
+                        }}
+                      />
+                    </>
+                  ) : taskStatus === 'completed' && !videoUrl ? (
+                    <div className="absolute inset-0 flex items-center justify-center bg-yellow-500/20">
+                      <div className="text-center p-4">
+                        <p className="text-yellow-300 font-medium">⚠️ Video URL is empty!</p>
+                        <p className="text-xs text-yellow-200/70 mt-2">Task ID: {taskId}</p>
+                        <p className="text-xs text-yellow-200/70">Provider: {provider}</p>
+                        {process.env.NODE_ENV === 'development' && (
+                          <button
+                            onClick={() =>
+                              console.log('Debug State:', { taskStatus, videoUrl, taskId, provider, progress })
+                            }
+                            className="mt-2 px-2 py-1 bg-yellow-500/30 rounded text-xs"
+                          >
+                            Log State to Console
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(148,163,184,0.18),transparent_60%)]" />
+                      <div className="text-center">
+                        <Sparkles className="mx-auto mb-2 size-8 text-white/30" />
+                        <p className="text-sm text-white/40">Your video will appear here</p>
+                      </div>
                     </div>
                   )}
-                  <video
-                    key={proxiedVideoUrl || videoUrl}
-                    src={proxiedVideoUrl || videoUrl}
-                    controls
-                    className="h-full w-full object-cover"
-                    autoPlay
-                    loop
-                    onError={(e) => {
-                      console.error('[Inline Video] ========== VIDEO ERROR ==========');
-                      console.error('[Inline Video] videoUrl:', videoUrl);
-                      console.error('[Inline Video] videoUrl type:', typeof videoUrl);
-                      console.error('[Inline Video] videoUrl length:', videoUrl?.length);
-                      console.error('[Inline Video] Error event:', e);
-                      console.error('[Inline Video] Native error:', (e.target as HTMLVideoElement).error);
-                      console.error('[Inline Video] Network state:', (e.target as HTMLVideoElement).networkState);
-                    }}
-                    onLoadStart={() => {
-                      console.log('[Inline Video] ========== VIDEO LOADING ==========');
-                      console.log('[Inline Video] videoUrl:', videoUrl);
-                    }}
-                    onLoadedData={(e) => {
-                      console.log('[Inline Video] ========== VIDEO LOADED ==========');
-                      console.log('[Inline Video] Duration:', (e.target as HTMLVideoElement).duration);
-                    }}
-                  />
-                </>
-              ) : taskStatus === 'completed' && !videoUrl ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-yellow-500/20">
-                  <div className="text-center p-4">
-                    <p className="text-yellow-300 font-medium">⚠️ Video URL is empty!</p>
-                    <p className="text-xs text-yellow-200/70 mt-2">Task ID: {taskId}</p>
-                    <p className="text-xs text-yellow-200/70">Provider: {provider}</p>
-                    {process.env.NODE_ENV === 'development' && (
-                      <button
-                        onClick={() => console.log('Debug State:', { taskStatus, videoUrl, taskId, provider, progress })}
-                        className="mt-2 px-2 py-1 bg-yellow-500/30 rounded text-xs"
-                      >
-                        Log State to Console
-                      </button>
-                    )}
-                  </div>
                 </div>
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-full w-full bg-slate-400/30" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <Sparkles className="mx-auto mb-2 size-8 text-white/30" />
-                      <p className="text-sm text-white/40">Your video will appear here</p>
-                    </div>
+              </div>
+
+              {isGenerating && (
+                <div className="mt-4 space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-white/70">
+                    <Loader2 className="size-4 animate-spin text-purple-400" />
+                    <span>Generating your video...</span>
                   </div>
+                  <div className="h-2 w-full rounded-full bg-white/10">
+                    <div
+                      className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-white/50 text-center">{progress}% complete</p>
                 </div>
               )}
-            </div>
-            </div>
 
-            {isGenerating && (
-              <div className="mt-4 space-y-3">
-                <div className="flex items-center gap-2 text-sm text-white/70">
-                  <Loader2 className="size-4 animate-spin text-purple-400" />
-                  <span>Generating your video...</span>
-                </div>
-                <div className="h-2 w-full rounded-full bg-white/10">
-                  <div
-                    className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-                <p className="text-xs text-white/50 text-center">{progress}% complete</p>
-              </div>
-            )}
-
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                className="flex-1 border-white/20 text-white hover:bg-white/10 bg-gradient-to-r from-purple-600/20 to-pink-600/20 hover:from-purple-600/30 hover:to-pink-600/30 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={!videoUrl || taskStatus !== 'completed'}
-                onClick={() => {
-                  if (!videoUrl) return;
-                  downloadVideo(videoUrl, `wan-ai-video-${Date.now()}.mp4`);
-                }}
-              >
-                <Download className="mr-2 size-4" />
-                Download
-              </Button>
-              {taskStatus === 'completed' && (
+              <div className="mt-4 flex flex-wrap gap-2">
                 <Button
                   size="sm"
                   variant="outline"
-                  className="border-white/20 text-white hover:bg-white/10"
-                  onClick={handleReset}
+                  className="flex-1 border-white/20 text-white hover:bg-white/10 bg-gradient-to-r from-purple-600/20 to-pink-600/20 hover:from-purple-600/30 hover:to-pink-600/30 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={!videoUrl || taskStatus !== 'completed'}
+                  onClick={() => {
+                    if (!videoUrl) return;
+                    downloadVideo(videoUrl, `wan-ai-video-${Date.now()}.mp4`);
+                  }}
                 >
-                  Create Another
+                  <Download className="mr-2 size-4" />
+                  Download
                 </Button>
-              )}
-            </div>
+                {taskStatus === 'completed' && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10"
+                    onClick={handleReset}
+                  >
+                    Create Another
+                  </Button>
+                )}
+              </div>
 
-            <div className="rounded-xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-white/70">
-              <div className="flex items-center justify-between">
-                <span>Cost per generation</span>
-                <span className="text-white font-semibold">20 credits</span>
+              <div className="mt-4 rounded-xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-white/70">
+                <div className="flex items-center justify-between">
+                  <span>Cost per generation</span>
+                  <span className="text-white font-semibold">20 credits</span>
+                </div>
               </div>
             </div>
           </div>
