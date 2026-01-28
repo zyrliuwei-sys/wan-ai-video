@@ -6,6 +6,7 @@ import { useRef } from 'react';
 
 import { Link } from '@/core/i18n/navigation';
 import { WanVideoGeneratorInline } from '@/shared/blocks/generator/wan-video';
+import { VideoShowcase } from '@/shared/blocks/gallery/video-showcase';
 import { Button } from '@/shared/components/ui/button';
 import { cn } from '@/shared/lib/utils';
 import { Section } from '@/shared/types/blocks/landing';
@@ -233,6 +234,9 @@ export function Hero({
       <div ref={generatorRef} id="wan-generator" className="relative z-10 mx-auto max-w-7xl px-4 pb-20">
         <WanVideoGeneratorInline />
       </div>
+
+      {/* Video Showcase */}
+      <VideoShowcase />
     </section>
   );
 }

@@ -190,15 +190,25 @@ function useWanVideoGenerator() {
   const isGenerating = taskStatus === 'generating';
 
   // Download video using a same-origin proxy to avoid CORS issues.
-  const downloadVideo = (url: string, filename: string) => {
-    // Simple direct download like veo4.studio
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  const downloadVideo = async (url: string, filename: string) => {
+    try {
+      const resp = await fetch(`/api/proxy/file?url=${encodeURIComponent(url)}`);
+      if (!resp.ok) {
+        throw new Error('Failed to fetch video');
+      }
+
+      const blob = await resp.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 200);
+    } catch (err) {
+      console.error('[Frontend] Failed to download video:', err);
+    }
   };
 
   return {
