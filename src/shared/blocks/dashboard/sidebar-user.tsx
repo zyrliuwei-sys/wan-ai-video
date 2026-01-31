@@ -84,23 +84,24 @@ export function SidebarUser({ user }: { user: SidebarUserType }) {
   }, [hasMounted, isPending, setIsCheckSign]);
 
   // show one tap if not initialized
-  useEffect(() => {
-    if (!hasMounted) {
-      return;
-    }
+  // Disabled to prevent FedCM errors
+  // useEffect(() => {
+  //   if (!hasMounted) {
+  //     return;
+  //   }
 
-    if (
-      configs &&
-      configs.google_client_id &&
-      configs.google_one_tap_enabled === 'true' &&
-      !session &&
-      !isPending &&
-      !oneTapInitialized.current
-    ) {
-      oneTapInitialized.current = true;
-      showOneTap(configs);
-    }
-  }, [hasMounted, configs, session, isPending, showOneTap]);
+  //   if (
+  //     configs &&
+  //     configs.google_client_id &&
+  //     configs.google_one_tap_enabled === 'true' &&
+  //     !session &&
+  //     !isPending &&
+  //     !oneTapInitialized.current
+  //   ) {
+  //     oneTapInitialized.current = true;
+  //     showOneTap(configs);
+  //   }
+  // }, [hasMounted, configs, session, isPending, showOneTap]);
 
   // set user
   useEffect(() => {

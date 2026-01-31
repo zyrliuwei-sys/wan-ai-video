@@ -26,18 +26,33 @@ import { SignInForm } from './sign-in-form';
 
 export function SignModal({ callbackUrl = '/' }: { callbackUrl?: string }) {
   const t = useTranslations('common.sign');
-  const { isShowSignModal, setIsShowSignModal } = useAppContext();
+  const {
+    isShowSignModal,
+    setIsShowSignModal,
+    signModalMessage,
+    setSignModalMessage,
+  } = useAppContext();
 
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
+  const handleOpenChange = (open: boolean) => {
+    setIsShowSignModal(open);
+    if (!open) {
+      setSignModalMessage(null);
+    }
+  };
+
   if (isDesktop) {
     return (
-      <Dialog open={isShowSignModal} onOpenChange={setIsShowSignModal}>
+      <Dialog open={isShowSignModal} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{t('sign_in_title')}</DialogTitle>
             <DialogDescription>{t('sign_in_description')}</DialogDescription>
           </DialogHeader>
+          {signModalMessage ? (
+            <p className="text-muted-foreground text-sm">{signModalMessage}</p>
+          ) : null}
           <SignInForm callbackUrl={callbackUrl} />
         </DialogContent>
       </Dialog>
@@ -45,12 +60,17 @@ export function SignModal({ callbackUrl = '/' }: { callbackUrl?: string }) {
   }
 
   return (
-    <Drawer open={isShowSignModal} onOpenChange={setIsShowSignModal}>
+    <Drawer open={isShowSignModal} onOpenChange={handleOpenChange}>
       <DrawerContent>
         <DrawerHeader className="text-left">
           <DrawerTitle>{t('sign_in_title')}</DrawerTitle>
           <DrawerDescription>{t('sign_in_description')}</DrawerDescription>
         </DrawerHeader>
+        {signModalMessage ? (
+          <p className="text-muted-foreground px-4 text-sm">
+            {signModalMessage}
+          </p>
+        ) : null}
         <SignInForm callbackUrl={callbackUrl} className="mt-8 px-4" />
         <DrawerFooter className="pt-4">
           <DrawerClose asChild>

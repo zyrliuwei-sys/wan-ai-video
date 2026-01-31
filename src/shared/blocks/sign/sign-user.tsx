@@ -84,19 +84,20 @@ export function SignUser({
   }, [isPending]);
 
   // show one tap if not initialized
-  useEffect(() => {
-    if (
-      configs &&
-      configs.google_client_id &&
-      configs.google_one_tap_enabled === 'true' &&
-      !session &&
-      !isPending &&
-      !oneTapInitialized.current
-    ) {
-      oneTapInitialized.current = true;
-      showOneTap(configs);
-    }
-  }, [configs, session, isPending]);
+  // Disabled to prevent FedCM errors
+  // useEffect(() => {
+  //   if (
+  //     configs &&
+  //     configs.google_client_id &&
+  //     configs.google_one_tap_enabled === 'true' &&
+  //     !session &&
+  //     !isPending &&
+  //     !oneTapInitialized.current
+  //   ) {
+  //     oneTapInitialized.current = true;
+  //     showOneTap(configs);
+  //   }
+  // }, [configs, session, isPending]);
 
   // set user
   useEffect(() => {

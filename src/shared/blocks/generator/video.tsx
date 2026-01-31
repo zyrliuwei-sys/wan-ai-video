@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  CreditCard,
   Download,
   Loader2,
   Sparkles,
@@ -12,9 +11,10 @@ import {
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
-import { Link } from '@/core/i18n/navigation';
+import { useRouter } from '@/core/i18n/navigation';
 import { AIMediaType, AITaskStatus } from '@/extensions/ai/types';
 import { ImageUploader, ImageUploaderValue } from '@/shared/blocks/common';
+import { SignModal } from '@/shared/blocks/sign/sign-modal';
 import { Button } from '@/shared/components/ui/button';
 import {
   Card,
@@ -234,8 +234,13 @@ export function VideoGenerator({
   );
   const [isMounted, setIsMounted] = useState(false);
 
-  const { user, isCheckSign, setIsShowSignModal, fetchUserCredits } =
-    useAppContext();
+  const {
+    user,
+    isCheckSign,
+    setIsShowSignModal,
+    setSignModalMessage,
+    fetchUserCredits,
+  } = useAppContext();
 
   useEffect(() => {
     setIsMounted(true);
@@ -477,12 +482,13 @@ export function VideoGenerator({
 
   const handleGenerate = async () => {
     if (!user) {
+      setSignModalMessage('Sign in now to get 1 free video generation!');
       setIsShowSignModal(true);
       return;
     }
 
     if (remainingCredits < costCredits) {
-      toast.error('Insufficient credits. Please top up to keep creating.');
+      router.push('/pricing');
       return;
     }
 
@@ -621,6 +627,7 @@ export function VideoGenerator({
 
   return (
     <section className="py-16 md:py-24">
+      <SignModal />
       <div className="container">
         <div className="mx-auto max-w-6xl">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
@@ -723,13 +730,54 @@ export function VideoGenerator({
 
                 <div className="space-y-2">
                   <Label htmlFor="video-prompt">{t('form.prompt')}</Label>
-                  <Textarea
-                    id="video-prompt"
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    placeholder={t('form.prompt_placeholder')}
-                    className="min-h-32"
-                  />
+                  <div className="relative">
+                    <Textarea
+                      id="video-prompt"
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                      placeholder={t('form.prompt_placeholder')}
+                      className="min-h-32 pr-32"
+                    />
+                    <div className="absolute bottom-2 right-2">
+                      {!isMounted ? (
+                        <Button disabled size="sm">
+                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                          {t('loading')}
+                        </Button>
+                      ) : isCheckSign ? (
+                        <Button disabled size="sm">
+                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                          {t('checking_account')}
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={handleGenerate}
+                          disabled={
+                            isGenerating ||
+                            !prompt.trim() ||
+                            isPromptTooLong ||
+                            isReferenceUploading ||
+                            hasReferenceUploadError ||
+                            (isImageToVideoMode && referenceImageUrls.length === 0) ||
+                            (isVideoToVideoMode && !referenceVideoUrl)
+                          }
+                        >
+                          {isGenerating ? (
+                            <>
+                              <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                              {t('generating')}
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="mr-1 h-3 w-3" />
+                              {t('generate')}
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                   <div className="text-muted-foreground flex items-center justify-between text-xs">
                     <span>
                       {promptLength} / {MAX_PROMPT_LENGTH}
@@ -743,61 +791,13 @@ export function VideoGenerator({
                 </div>
 
                 {!isMounted ? (
-                  <Button className="w-full" disabled size="lg">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('loading')}
-                  </Button>
-                ) : isCheckSign ? (
-                  <Button className="w-full" disabled size="lg">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('checking_account')}
-                  </Button>
-                ) : user ? (
-                  <Button
-                    size="lg"
-                    className="w-full"
-                    onClick={handleGenerate}
-                    disabled={
-                      isGenerating ||
-                      (isTextToVideoMode && !prompt.trim()) ||
-                      isPromptTooLong ||
-                      isReferenceUploading ||
-                      hasReferenceUploadError ||
-                      (isImageToVideoMode && referenceImageUrls.length === 0) ||
-                      (isVideoToVideoMode && !referenceVideoUrl)
-                    }
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t('generating')}
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        {t('generate')}
-                      </>
-                    )}
-                  </Button>
-                ) : (
-                  <Button
-                    size="lg"
-                    className="w-full"
-                    onClick={() => setIsShowSignModal(true)}
-                  >
-                    <User className="mr-2 h-4 w-4" />
-                    {t('sign_in_to_generate')}
-                  </Button>
-                )}
-
-                {!isMounted ? (
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-primary">
                       {t('credits_cost', { credits: costCredits })}
                     </span>
                     <span>{t('credits_remaining', { credits: 0 })}</span>
                   </div>
-                ) : user && remainingCredits > 0 ? (
+                ) : (
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-primary">
                       {t('credits_cost', { credits: costCredits })}
@@ -805,23 +805,6 @@ export function VideoGenerator({
                     <span>
                       {t('credits_remaining', { credits: remainingCredits })}
                     </span>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-primary">
-                        {t('credits_cost', { credits: costCredits })}
-                      </span>
-                      <span>
-                        {t('credits_remaining', { credits: remainingCredits })}
-                      </span>
-                    </div>
-                    <Link href="/pricing">
-                      <Button variant="outline" className="w-full" size="lg">
-                        <CreditCard className="mr-2 h-4 w-4" />
-                        {t('buy_credits')}
-                      </Button>
-                    </Link>
                   </div>
                 )}
 

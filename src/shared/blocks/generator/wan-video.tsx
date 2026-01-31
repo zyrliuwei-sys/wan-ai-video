@@ -26,19 +26,9 @@ import { Particles } from '@/shared/components/ui/particles';
 import { ShimmerButton } from '@/shared/components/ui/shimmer-button';
 import { useSession } from '@/core/auth/client';
 import { Link } from '@/core/i18n/navigation';
+import { useAppContext } from '@/shared/contexts/app';
+import { SignModal } from '@/shared/blocks/sign/sign-modal';
 import { cn } from '@/shared/lib/utils';
-
-// Anonymous user management
-const ANONYMOUS_ID_KEY = 'anonymous_video_id';
-const getAnonymousId = () => {
-  if (typeof window === 'undefined') return null;
-  let id = localStorage.getItem(ANONYMOUS_ID_KEY);
-  if (!id) {
-    id = `anon_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-    localStorage.setItem(ANONYMOUS_ID_KEY, id);
-  }
-  return id;
-};
 
 interface VideoGeneratorProps {
   open: boolean;
@@ -61,10 +51,11 @@ function useWanVideoGenerator() {
   const [provider, setProvider] = useState<'evolink' | 'replicate' | ''>('');
   const [progress, setProgress] = useState(0);
 
-  // Anonymous/free usage states
-  const [needsAuth, setNeedsAuth] = useState(false);
+  const [showSubscribePrompt, setShowSubscribePrompt] = useState(false);
   const [isFreeUsage, setIsFreeUsage] = useState(false);
   const session = useSession();
+  const isAuthenticated = !!session.data?.user;
+  const { setIsShowSignModal, setSignModalMessage } = useAppContext();
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [error, setError] = useState<string>('');
 
@@ -136,7 +127,7 @@ function useWanVideoGenerator() {
     setError('');
     setVideoUrl('');
     setProgress(0);
-    setNeedsAuth(false);
+    setShowSubscribePrompt(false);
     setIsFreeUsage(false);
 
     if (type === 'text-to-video' && !prompt.trim()) {
@@ -149,8 +140,12 @@ function useWanVideoGenerator() {
       return;
     }
 
-    // Get anonymous ID if not logged in
-    const anonymousId = !session.data?.user ? getAnonymousId() : null;
+    if (!isAuthenticated) {
+      setTaskStatus('idle');
+      setSignModalMessage('Sign in now to get 1 free video generation!');
+      setIsShowSignModal(true);
+      return;
+    }
 
     setTaskStatus('generating');
 
@@ -160,7 +155,6 @@ function useWanVideoGenerator() {
         aspectRatio,
         quality,
         duration,
-        anonymousId: anonymousId ? 'yes' : 'no',
       });
 
       const response = await fetch('/api/ai/video/generate', {
@@ -173,7 +167,6 @@ function useWanVideoGenerator() {
           aspectRatio,
           quality,
           duration,
-          anonymousId,
         }),
       });
 
@@ -186,9 +179,24 @@ function useWanVideoGenerator() {
         const errorMessage = json.data?.details || json.data?.error || json.message || 'Failed to start generation';
 
         // Check if error is about free usage exceeded
-        if (errorMessage.includes('FREE_USAGE_EXCEEDED') || errorMessage.includes('free generation')) {
+        if (
+          errorMessage.includes('FREE_USAGE_EXCEEDED') ||
+          errorMessage.includes('free generation') ||
+          errorMessage.toLowerCase().includes('insufficient credits')
+        ) {
           setTaskStatus('idle');
-          setNeedsAuth(true);
+          setShowSubscribePrompt(true);
+          setError('');
+          return;
+        }
+
+        if (
+          errorMessage.toLowerCase().includes('please sign in') ||
+          errorMessage.toLowerCase().includes('no auth')
+        ) {
+          setTaskStatus('idle');
+          setSignModalMessage('Sign in now to get 1 free video generation!');
+          setIsShowSignModal(true);
           setError('');
           return;
         }
@@ -271,7 +279,8 @@ function useWanVideoGenerator() {
     handleGenerate,
     handleReset,
     downloadVideo,
-    needsAuth,
+    showSubscribePrompt,
+    setShowSubscribePrompt,
     isFreeUsage,
   };
 }
@@ -299,7 +308,8 @@ export function WanVideoGenerator({ open, onOpenChange }: VideoGeneratorProps) {
     handleGenerate,
     handleReset,
     downloadVideo,
-    needsAuth,
+    showSubscribePrompt,
+    setShowSubscribePrompt,
     isFreeUsage,
   } = useWanVideoGenerator();
 
@@ -569,33 +579,31 @@ export function WanVideoGenerator({ open, onOpenChange }: VideoGeneratorProps) {
         )}
       </DialogContent>
 
-      {/* Auth required dialog */}
-      <Dialog open={needsAuth} onOpenChange={() => {}}>
+      <Dialog open={showSubscribePrompt} onOpenChange={setShowSubscribePrompt}>
         <DialogContent className="max-w-md border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-white">
-              <AlertCircle className="size-5 text-yellow-400" />
-              Free Generation Used
+              <Wallet className="size-5 text-yellow-300" />
+              Subscribe to Continue
             </DialogTitle>
             <DialogDescription className="text-white/60">
-              You have used your free video generation. Sign in to continue creating amazing videos!
+              Your free video is used. Subscribe to keep generating videos.
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-col gap-3 pt-4">
-            <Button asChild className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
-              <Link href="/auth/sign-in" className="flex items-center justify-center gap-2">
-                <LogIn className="size-4" />
-                Sign In to Continue
+            <Button asChild className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white">
+              <Link href="/pricing" className="flex items-center justify-center gap-2">
+                <Wallet className="size-4" />
+                View Pricing Plans
               </Link>
             </Button>
             <Button
               variant="outline"
               className="w-full border-white/10 text-white/80 hover:bg-white/5"
-              onClick={() => window.location.href = '/pricing'}
+              onClick={() => setShowSubscribePrompt(false)}
             >
-              <Wallet className="size-4 mr-2" />
-              View Pricing Plans
+              Maybe Later
             </Button>
           </div>
         </DialogContent>
@@ -612,6 +620,7 @@ export function WanVideoGeneratorInline({
   // Get user session
   const { data: session } = useSession();
   const isAuthenticated = !!session?.user;
+  const { setIsShowSignModal, setSignModalMessage } = useAppContext();
 
   const {
     type,
@@ -625,7 +634,6 @@ export function WanVideoGeneratorInline({
     duration,
     setDuration,
     taskStatus,
-    setTaskStatus,
     taskId,
     provider,
     progress,
@@ -636,7 +644,8 @@ export function WanVideoGeneratorInline({
     handleGenerate,
     handleReset,
     downloadVideo,
-    needsAuth,
+    showSubscribePrompt,
+    setShowSubscribePrompt,
     isFreeUsage,
   } = useWanVideoGenerator();
 
@@ -847,14 +856,7 @@ export function WanVideoGeneratorInline({
 
             <div className="mt-6 space-y-3">
               <ShimmerButton
-                onClick={() => {
-                  if (!isAuthenticated) {
-                    setError('Please sign in to generate videos');
-                    setTaskStatus('failed');
-                    return;
-                  }
-                  handleGenerate();
-                }}
+                onClick={handleGenerate}
                 disabled={isGenerating}
                 className="h-14 w-full rounded-xl border border-white/10 bg-gradient-to-b from-fuchsia-500 via-purple-600 to-indigo-700 text-white text-base font-semibold shadow-[0_18px_30px_rgba(76,29,149,0.45),0_6px_12px_rgba(15,23,42,0.6),inset_0_1px_0_rgba(255,255,255,0.35)] transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0"
                 shimmerColor="#ffffff"
@@ -885,16 +887,18 @@ export function WanVideoGeneratorInline({
                     <p className="font-medium">Generation failed</p>
                     <p className="text-xs mt-1">{error}</p>
                     {isAuthError && (
-                      <Link href="/auth/signin">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="mt-2 h-8 border-red-400/30 text-red-200 hover:bg-red-500/20 hover:text-red-100"
-                        >
-                          <LogIn className="mr-1.5 size-3.5" />
-                          Sign In to Generate
-                        </Button>
-                      </Link>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-2 h-8 border-red-400/30 text-red-200 hover:bg-red-500/20 hover:text-red-100"
+                        onClick={() => {
+                          setSignModalMessage('Sign in now to get 1 free video generation!');
+                          setIsShowSignModal(true);
+                        }}
+                      >
+                        <LogIn className="mr-1.5 size-3.5" />
+                        Sign In to Generate
+                      </Button>
                     )}
                     {isCreditsError && (
                       <Link href="/pricing">
@@ -1065,39 +1069,37 @@ export function WanVideoGeneratorInline({
         </div>
       </div>
 
-      {/* Auth required dialog */}
-      {needsAuth && (
-        <Dialog open={needsAuth} onOpenChange={() => {}}>
-          <DialogContent className="max-w-md border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-white">
-                <AlertCircle className="size-5 text-yellow-400" />
-                Free Generation Used
-              </DialogTitle>
-              <DialogDescription className="text-white/60">
-                You have used your free video generation. Sign in to continue creating amazing videos!
-              </DialogDescription>
-            </DialogHeader>
+      <Dialog open={showSubscribePrompt} onOpenChange={setShowSubscribePrompt}>
+        <DialogContent className="max-w-md border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <Wallet className="size-5 text-yellow-300" />
+              Subscribe to Continue
+            </DialogTitle>
+            <DialogDescription className="text-white/60">
+              Your free video is used. Subscribe to keep generating videos.
+            </DialogDescription>
+          </DialogHeader>
 
-            <div className="flex flex-col gap-3 pt-4">
-              <Button asChild className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
-                <Link href="/auth/sign-in" className="flex items-center justify-center gap-2">
-                  <LogIn className="size-4" />
-                  Sign In to Continue
-                </Link>
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full border-white/10 text-white/80 hover:bg-white/5"
-                onClick={() => window.location.href = '/pricing'}
-              >
-                <Wallet className="size-4 mr-2" />
+          <div className="flex flex-col gap-3 pt-4">
+            <Button asChild className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white">
+              <Link href="/pricing" className="flex items-center justify-center gap-2">
+                <Wallet className="size-4" />
                 View Pricing Plans
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full border-white/10 text-white/80 hover:bg-white/5"
+              onClick={() => setShowSubscribePrompt(false)}
+            >
+              Maybe Later
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <SignModal />
     </div>
   );
 }
